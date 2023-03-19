@@ -3,7 +3,7 @@ using Emerald.Types;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("string x = GetRandomString(new int[] { 5, 6, 7 })"); //i dont want to write any external files rn
+Lexer lex = new("namespace HelloWorld { ruleset { stackprefferred; } void Main() { char *ptr = \"Hello World\"!; print(*ptr) } }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 try
