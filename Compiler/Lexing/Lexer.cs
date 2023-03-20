@@ -313,14 +313,4 @@ public class Lexer
 
         tokenarr = tokens.ToArray();
     }
-
-    public char ReadPos()
-    {
-        return _essay[_pos];
-    }
-
-    public string ReadFuture(int end)
-    {
-        return _essay.Substring(_pos).Remove(_pos + end);
-    }
 }

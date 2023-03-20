@@ -66,7 +66,12 @@ public class ASTRulesetInstruction : ASTNode
 public class ASTRulesetDeclaration : ASTNode
 {
     public ASTNode? nspace { get; set; }
-    public List<ASTNode>? rules { get; set; }
+    public List<ASTNode> rules { get; set; } = new();
+
+    public void Add(ASTNode instruction)
+    {
+        rules.Add(instruction);
+    }
 }
 
 public class ASTNamespaceDeclaration : ASTNode
@@ -74,6 +79,48 @@ public class ASTNamespaceDeclaration : ASTNode
     public string? name { get; set; }
     public ASTNode? ruleset { get; set; }
     public List<ASTNode>? methods { get; set; }
+
+    public ASTNamespaceDeclaration(string? n, ASTNode? rs, List<ASTNode>? met)
+    {
+        name = n;
+        ruleset = rs;
+        methods = met;
+    }
+
+    //it is very easy for us to search for a namespace since it is always a root node
+    public static ASTNode? SearchFor(string name, in AbstractSyntaxTree tree)
+    {
+        foreach(ASTNode node in tree)
+        {
+            if(node.type == ASTNodeType.NAMESPACE_DECL)
+            {
+                ASTNamespaceDeclaration ndecl = (ASTNamespaceDeclaration)node;
+                if(ndecl.name == name)
+                {
+                    return node;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static int? IndexOf(string name, in AbstractSyntaxTree tree)
+    {
+        for(int i = 0; i < tree.Length; i++)
+        {
+            if(tree[i].type == ASTNodeType.NAMESPACE_DECL)
+            {
+                ASTNamespaceDeclaration ndecl = (ASTNamespaceDeclaration)tree[i];
+                if(ndecl.name == name)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return null;
+    }
 }
 
 public class ASTMethodDeclaration : ASTNode
