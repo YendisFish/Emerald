@@ -5,7 +5,7 @@ using Emerald.AST;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("namespace HelloWorld { ruleset { selfalloc; } void Main() { char *ptr = \"Hello World\"!; print(*ptr) } }"); //i dont want to write any external files rn
+Lexer lex = new("namespace HelloWorld { ruleset { selfalloc; stackpreferred; } void Main() { char *ptr = \"Hello World\"!; print(*ptr) } }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 try
@@ -33,13 +33,20 @@ foreach(ASTNode node in tree)
 {
     if(node.type == ASTNodeType.NAMESPACE_DECL)
     {
-        Console.WriteLine(((ASTNamespaceDeclaration)node).name);
+        Console.WriteLine("Namespace: " + ((ASTNamespaceDeclaration)node).name);
 
         ASTNamespaceDeclaration decl = ((ASTNamespaceDeclaration)node);
+        ASTRulesetDeclaration? ruleset = ((ASTRulesetDeclaration)decl.ruleset!);
 
-        if(decl.ruleset != null)
+        Console.WriteLine("Ruleset:");
+
+        if(ruleset != null)
         {
-            Console.WriteLine("Found ruleset!");
+            foreach(ASTNode n in ruleset.rules)
+            {
+                ASTRulesetInstruction inst = (ASTRulesetInstruction)n;
+                Console.WriteLine(inst.keyword);
+            }
         }
     }
 }

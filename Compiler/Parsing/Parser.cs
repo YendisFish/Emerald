@@ -50,11 +50,6 @@ public class Parser
                             ((ASTNamespaceDeclaration)tree[_cur_ns_ind]).ruleset = decl;
                             decl.nspace = ((ASTNamespaceDeclaration)tree[_cur_ns_ind]);
 
-                            if(toks[_pos + 1]._tp == TokenType.LCBRACE)
-                            {
-                                _pos = _pos + 1;
-                            }
-
                             ReadRuleset(ref decl, ref tree);
                             continue;
                         }
@@ -70,7 +65,8 @@ public class Parser
 
     public void ReadRuleset(ref ASTRulesetDeclaration decl, ref AbstractSyntaxTree tree)
     {
-        while(true)
+        bool pos_is_in = true;
+        while(pos_is_in)
         {
             switch(toks[_pos]._tp)
             {
@@ -90,6 +86,84 @@ public class Parser
                             _pos = _pos + 1;
                             continue;
                         }
+
+                        case "unsafe":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.UNSAFE;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
+
+                        case "unmanaged":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.UNMANAGED;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
+
+                        case "stackpreferred":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.STACKPREFERRED;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
+
+                        case "stackrequired":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.STACKREQUIRED;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
+
+                        case "heappreferred":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.HEAPPREFERRED;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
+
+                        case "heaprequired":
+                        {
+                            ASTRulesetInstruction inst = new();
+                            inst.ruleset = decl;
+                            inst.keyword = Keywords.HEAPREQUIRED;
+                            inst.type = ASTNodeType.RULESET_INSTRUCTION;
+
+                            decl.Add(inst);
+
+                            _pos = _pos + 1;
+                            continue;
+                        }
                     }
 
                     break;
@@ -97,12 +171,24 @@ public class Parser
                 
                 case TokenType.SEMICOLON:
                 {
-                    continue;
+                    break;
+                }
+
+                case TokenType.RCBRACE:
+                {
+                    pos_is_in = !pos_is_in;
+                    break;
+                }
+
+                case TokenType.LCBRACE:
+                {
+                    break;
                 }
 
                 default:
                 {
                     Console.WriteLine(toks[_pos]._tp);
+                    Console.WriteLine(_pos);
                     throw new Exception("Unexpected semantics in ruleset!");
                 }
             }
