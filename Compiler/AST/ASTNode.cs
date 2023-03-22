@@ -33,6 +33,7 @@ public class ASTVariable : ASTNode
 {
     public string? name { get; set; }
     public ASTNode? value { get; set; }
+    public VarType vtype { get; set; }
 }
 
 public class ASTValue : ASTNode

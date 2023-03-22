@@ -230,9 +230,17 @@ public class Parser
                             {
                                 ASTMethodDeclaration decl = new();
                                 decl.type = ASTNodeType.METHOD_DECL;
-                            } else {
+                            } else if(toks[_pos + 1]._tp == TokenType.OPERATOR && toks[_pos + 1]._value == "*")
+                            {
+                                //create a pointer instance
+                            } else
+                            {
                                 ASTVariable var = new();
                                 var.type = ASTNodeType.VARIABLE;
+                                var.vtype = VarType.INT;
+                                
+                                _pos = _pos + 1;
+                                ReadProperty(ref var, ref tree, ref cls);
                             }
 
                             break;
@@ -318,4 +326,51 @@ public class Parser
             _pos = _pos + 1;
         }
     }
+
+    public void ReadProperty(ref ASTVariable var, ref AbstractSyntaxTree tree, ref ASTClass cls)
+    {
+        while(true)
+        {
+            switch(var.vtype)
+            {
+                case VarType.INT:
+                {
+                    if(toks[_pos]._tp == TokenType.WORD)
+                    {
+                        var.name = toks[_pos]._value;
+
+                        if(toks[_pos + 1]._tp == TokenType.OPERATOR && toks[_pos + 1]._value == "=")
+                        {
+                            //This is going to take a FAT bit of code
+
+                            /*
+                                For reading assingments we need to do a few things:
+
+                                1. If it is a function then we need to go down to the function
+                                and make sure that it is of the same return type.
+
+                                2. If it is an index from an array then we need to check that
+                                array.
+
+                                3. If it is a constant then it'll be pretty easy to set.
+                            */
+                        } else {
+                            throw new Exception("Unexpected operator while assinging to intenger " + var.name + " in class " + cls.name);
+                        }
+                    } else {
+                        throw new Exception("Unexpected variable initialization!");
+                    }
+
+                    break;
+                }
+            }
+
+            _pos = _pos + 1;
+        }
+    }
+
+    public void ReadPointerProperty() { }
+    public void ReadVar() { }
+    public void ReadPointer() { }
+
 }
