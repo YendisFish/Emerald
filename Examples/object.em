@@ -3,10 +3,7 @@
 
 namespace Colors
 {
-    ruleset
-    {
-        default;
-    }
+    ruleset default;
 
     class Red
     {
