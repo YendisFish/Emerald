@@ -22,5 +22,9 @@ public enum Keywords
         with the next two keywords the compiler automatically knows to import the memory management library
     */
     UNSAFE, //tolerates pointers
-    UNMANAGED //doesn't mess with memory (only valid in unsafe context)
+    UNMANAGED, //doesn't mess with memory (only valid in unsafe context)
+
+    //Next we have contextual keywords
+    DEFAULT,
+    FIELDS
 }
