@@ -123,6 +123,14 @@ public class ASTNamespaceDeclaration : ASTNode
     }
 }
 
+public class ASTClass : ASTNode
+{
+    public ASTNode? nspace { get; set; }
+    public string? name { get; set;}
+    public List<ASTNode>? fields { get; set; } = new();
+    public ASTNode? constructor { get; set; }
+}
+
 public class ASTMethodDeclaration : ASTNode
 {
     public string? name { get; set; }
@@ -174,5 +182,6 @@ public enum ASTNodeType
     IF,
     WHILE,
     FOR,
+    CLASS,
     CALL
 }

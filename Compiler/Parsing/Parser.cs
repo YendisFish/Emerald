@@ -49,8 +49,23 @@ public class Parser
                             ASTRulesetDeclaration decl = new();
                             ((ASTNamespaceDeclaration)tree[_cur_ns_ind]).ruleset = decl;
                             decl.nspace = ((ASTNamespaceDeclaration)tree[_cur_ns_ind]);
+                            decl.type = ASTNodeType.RULESET_DECL;
 
                             ReadRuleset(ref decl, ref tree);
+                            continue;
+                        }
+
+                        case "class":
+                        {
+                            ASTClass cls = new();
+                            cls.nspace = tree[_cur_ns_ind];
+                            cls.type = ASTNodeType.CLASS;
+
+                            string name = toks[_pos + 1]._value;
+                            cls.name = name;
+                            _pos = _pos + 2;
+                            ReadClass(ref cls, ref tree, name);
+
                             continue;
                         }
                     }
@@ -190,6 +205,68 @@ public class Parser
                     Console.WriteLine(toks[_pos]._tp);
                     Console.WriteLine(_pos);
                     throw new Exception("Unexpected semantics in ruleset!");
+                }
+            }
+
+            _pos = _pos + 1;
+        }
+    }
+
+    public void ReadClass(ref ASTClass cls, ref AbstractSyntaxTree tree, string name)
+    {
+        bool pos_is_in = true;
+        while(pos_is_in)
+        {
+            switch(toks[_pos]._tp)
+            {
+                case TokenType.WORD:
+                {
+                    switch(toks[_pos]._value)
+                    {
+                        case "int":
+                        {
+                            break;
+                        }
+
+                        case "char":
+                        {
+                            break;
+                        }
+
+                        case "bool":
+                        {
+                            break;
+                        }
+
+                        case "long":
+                        {
+                            break;
+                        }
+
+                        case "short":
+                        {
+                            break;
+                        }
+
+                        case "float":
+                        {
+                            break;
+                        }
+
+                        case "byte":
+                        {
+                            break;
+                        }
+                    }
+
+                    _pos = _pos + 1;
+                    continue;
+                }
+
+                case TokenType.LCBRACE:
+                {
+                    _pos = _pos + 1;
+                    continue;
                 }
             }
 
