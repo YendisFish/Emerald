@@ -135,9 +135,10 @@ public class ASTClass : ASTNode
 public class ASTMethodDeclaration : ASTNode
 {
     public string? name { get; set; }
-    public ASTNode? args { get; set; }
-    public ASTNode? nspace { get; set; }
-    public ASTNode? nodes { get; set; }
+    public List<ASTNode>? args { get; set; } = new();
+    public ASTNode? nspace { get; set; } 
+    public List<ASTNode>? nodes { get; set; } = new();
+    public Keywords returntype { get; set; }
 }
 
 public class ASTConst : ASTNode

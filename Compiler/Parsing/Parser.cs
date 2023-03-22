@@ -226,6 +226,15 @@ public class Parser
                     {
                         case "int":
                         {
+                            if(toks[_pos + 2]._tp == TokenType.LPAREN)
+                            {
+                                ASTMethodDeclaration decl = new();
+                                decl.type = ASTNodeType.METHOD_DECL;
+                            } else {
+                                ASTVariable var = new();
+                                var.type = ASTNodeType.VARIABLE;
+                            }
+
                             break;
                         }
 
@@ -258,6 +267,35 @@ public class Parser
                         {
                             break;
                         }
+
+                        default:
+                        {
+                            if(toks[_pos]._value == name)
+                            {
+                                ASTMethodDeclaration decl = new();
+                                decl.name = name;
+                                
+                                cls.fields?.Add(decl);
+                                //ReadMethod(out decl, ref tree);
+                            }
+
+                            foreach(ASTNode nd in cls.fields ?? new())
+                            {
+                                switch(nd.type)
+                                {
+                                    case ASTNodeType.METHOD_DECL:
+                                    {
+                                        break;
+                                    }
+                                    case ASTNodeType.VARIABLE:
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            throw new Exception("Could not parse AST! Invalid keyword was found!");
+                        }
                     }
 
                     _pos = _pos + 1;
@@ -268,6 +306,12 @@ public class Parser
                 {
                     _pos = _pos + 1;
                     continue;
+                }
+
+                case TokenType.RCBRACE:
+                {
+                    pos_is_in = !pos_is_in;
+                    break;
                 }
             }
 
