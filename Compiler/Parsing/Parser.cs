@@ -60,6 +60,7 @@ public class Parser
                             ASTClass cls = new();
                             cls.nspace = tree[_cur_ns_ind];
                             cls.type = ASTNodeType.CLASS;
+                            cls.keyword = Keywords.CLASS;
 
                             string name = toks[_pos + 1]._value;
                             cls.name = name;

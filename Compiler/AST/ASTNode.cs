@@ -129,6 +129,7 @@ public class ASTClass : ASTNode
     public string? name { get; set;}
     public List<ASTNode>? fields { get; set; } = new();
     public ASTNode? constructor { get; set; }
+    public Keywords keyword { get; set; }
 }
 
 public class ASTMethodDeclaration : ASTNode
