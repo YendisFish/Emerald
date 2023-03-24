@@ -369,8 +369,56 @@ public class Parser
         }
     }
 
+    //this will leave you on the index after the semicolon
+    public void ReadToSemicolon(ref List<Token> arr)
+    {
+        //clear the list since we are supposedly reading from the last semicolon!
+        arr = new();
+
+        while(true)
+        {
+            if(toks[_pos]._tp == TokenType.SEMICOLON)
+            {
+                _pos = _pos + 1;
+                break;
+            }
+
+            arr.Add(toks[_pos]);
+            _pos = _pos + 1;
+        }
+    }
+
     public void ReadPointerProperty() { }
     public void ReadVar() { }
     public void ReadPointer() { }
+    public void ReadReference() { }
 
+    public void ReadAmbiguousNamespaceContext() { }
+
+    public void ReadAmbiguousClassContext(out ASTNode node, ref AbstractSyntaxTree tree, in ASTNode parent)
+    {
+        List<Token> section = new();
+
+
+        ASTClass cls = (ASTClass)parent;
+
+        while(true)
+        {
+            switch(toks[_pos]._tp)
+            {
+                case TokenType.WORD:
+                {
+                    foreach(ASTNode nd in cls.fields ?? new())
+                    {
+                        //first we check against it as a variable
+                        ASTVariable var = (ASTVariable)nd;
+                    }
+
+                    break;
+                }
+            }
+
+            _pos = _pos + 1;
+        }
+    }
 }

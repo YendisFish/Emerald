@@ -62,6 +62,17 @@ public class Lexer
                     continue;
                 }
 
+                case '.':
+                {
+                    tokens.Add(cur_t);
+                    cur_t = new Token((TokenType)0, new int[0], "");
+
+                    Token newtok = new Token(TokenType.DOT, new int[1] { _pos }, ".");
+
+                    _pos = _pos + 1;
+                    continue;
+                }
+
                 case '(':
                 {
                     tokens.Add(cur_t);

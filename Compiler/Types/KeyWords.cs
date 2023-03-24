@@ -16,7 +16,7 @@ public enum Keywords
     HEAPPREFERRED, //values are by default heap allocated but are capable of sitting on the stack
     HEAPREQUIRED, //values are only allocated in the heap
 
-    //GC notifiers
+    //GC notifiers MACs
     SELFALLOC, //GC doesn't help us at all
     /*
         with the next two keywords the compiler automatically knows to import the memory management library

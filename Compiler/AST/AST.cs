@@ -25,4 +25,12 @@ public class AbstractSyntaxTree : List<ASTNode>
     {
         rootNodes.Add(node);
     }
+
+    public void SearchFor(ref ASTNode nd)
+    {
+        
+    }
+
+    public void SearchClass() { }
+    public void SearchMethod() { }
 }

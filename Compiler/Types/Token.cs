@@ -31,5 +31,6 @@ public enum TokenType
     WHITESPACE,
     STRING,
     CHAR,
-    COMMA
+    COMMA,
+    DOT
 }
