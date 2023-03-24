@@ -28,7 +28,10 @@ public class AbstractSyntaxTree : List<ASTNode>
 
     public void SearchFor(ref ASTNode nd)
     {
-        
+        foreach(ASTNode node in this)
+        {
+
+        }
     }
 
     public void SearchClass() { }
