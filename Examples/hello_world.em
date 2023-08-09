@@ -36,10 +36,10 @@ ___ |           |__________ type string
 |                           |____________ set value
 |                                       |___________ call func
 |                                                   |___________ allocate_str(const_1)
-|
-|
-|__ init var const_1
-    |________________ type int
-                     |________ set value
-                              |__________ 12      
+|                                                   |
+|                                                   |_init var const_1
+                                                      |______ type int
+                                                              |_____ set value
+                                                                    |___________ 12
+                              
 */                                      
