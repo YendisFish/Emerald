@@ -5,7 +5,7 @@ using Emerald.AST;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("namespace HelloWorld { ruleset { selfalloc; stackpreferred; } void Main(string[] args) { char *ptr = \"Hello World!\"; print(*ptr) } }"); //i dont want to write any external files rn
+Lexer lex = new("void Main(string[] args) { char *ptr = \"Hello World!\"; print(*ptr) }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 try
