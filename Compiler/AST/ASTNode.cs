@@ -11,17 +11,23 @@ public abstract class StatementNode : ASTNode
     public ExpressionNode baseExpression { get; set; }
 }
 
-public class NamespaceNode : ASTNode
+public class ImportNode : ASTNode
 {
-    public string name { get; set; } = "";
-    public RulesetNode ruleset { get; set; }
+    public string importPath { get; set; } = "";
 }
 
 public class RulesetNode : ASTNode
 {
-    public bool selfAlloc { get; set; } = false;
+    public bool rungc { get; set; } = false;
     public bool stackPreferred { get; set; } = false;
     public bool heapPreferred { get; set; } = false;
+}
+
+public class ConstantNode : ASTNode
+{
+    public string name { get; set; } = "";
+    public string type { get; set; } = "";
+    public object value { get; set; } = "";
 }
 
 #region Functions
