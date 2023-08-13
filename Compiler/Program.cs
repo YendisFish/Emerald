@@ -5,7 +5,7 @@ using Emerald.AST;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("ruleset; void Main(int arglenth, char **args) { char* ptr = \"Hello World!\"; print(ptr) }"); //i dont want to write any external files rn
+Lexer lex = new("ruleset; void Main(int arglen, char **args) { char ptr = 'a'; print(ptr) }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 List<Token> nowhitespace = new();
@@ -19,6 +19,13 @@ foreach(Token t in toks)
 
     nowhitespace.Add(t);
 }
+
+foreach(Token t in nowhitespace)
+{
+    Console.WriteLine($"Type: {t._tp} | Value: {t._value}");
+}
+
+Console.WriteLine("------------------------------------------------------------");
 
 Parser p = new Parser(ref nowhitespace);
 
@@ -45,7 +52,12 @@ foreach(ASTNode node in tree.nodes)
         {
             Console.Write($"TP: {param.type} NM: {param.name} | ");
         }
-        Console.WriteLine();
+        Console.WriteLine("\nFunction Body: ");
+        foreach(ASTNode funcMember in func.body)
+        {
+            VarDeclarationNode varNode = (VarDeclarationNode)funcMember;
+            Console.WriteLine($"TP: {varNode.type} | NM: {varNode.name}");
+        }
     }
 }
 

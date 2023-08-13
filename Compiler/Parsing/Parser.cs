@@ -22,6 +22,7 @@ public class Parser
         List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
         for(int i = 0; i < nodes.Count; i++)
         {
+            ParseFunctionBody(nodes[i]);
             tree.nodes.Add(nodes[i]);
         }
         
@@ -167,7 +168,7 @@ public class Parser
                 {
                     node.type = tokenSlice[i]._value;
                 } else if(tokenSlice[i + 1]._tp == TokenType.COMMA) {
-                    node.name = tokenSlice[i]._value;   
+                    node.name = tokenSlice[i]._value;
                 }
             }
         }
@@ -178,10 +179,8 @@ public class Parser
         return nodes;
     }
 
-    public List<ASTNode> ParseFunctionBody(ref FunctionDeclarationNode decl)
-    {
-        List<ASTNode> nodes = new List<ASTNode>();
-        
+    public void ParseFunctionBody(FunctionDeclarationNode decl)
+    {      
         int start = NavigateToFunction(decl.name) + 3; //this puts us in such a place that our next token is the first token in the function body
 
         for(int i = start; i < toks.Count; i++)
@@ -190,10 +189,9 @@ public class Parser
             {
                 VarDeclarationNode node = new();
                 i = ParseVarDeclaration(ref node, i);
+                decl.body.Add(node);
             }
         }
-
-        return nodes;
     }
 
     public int NavigateToFunction(string name)
@@ -230,7 +228,7 @@ public class Parser
             AssignmentNode asmNode = new();
             asmNode.node = varNode;
             asmNode.value = expr;
-
+            
             node.assignment = asmNode;
         } else {
             throw new Exception($"Could not parse variable declaration for variable {node.name}");

@@ -151,35 +151,21 @@ public class Lexer
 
                     cur_t = new Token((TokenType)0, new int[0], "");
 
-                    Token newtok = new Token(TokenType.STRINDICATOR, new int[1] { _pos }, "\"");
-                    tokens.Add(newtok);
-
                     Token intern = new Token(TokenType.STRING, new int[0], "");
 
+                    _pos = _pos + 1;
                     while(true)
                     {
-                        int[] newp = new int[intern._positions.Length + 1];
-                        for(int i = 0; i < newp.Length; i++)
-                        {
-                            if(_essay[_pos] >= intern._positions.Length)
-                            {
-                                newp[newp.Length - 1] = _pos;
-                                break;
-                            }
-
-                            newp[i] = intern._positions[i];
-                        }
-
                         if(_essay[_pos] == '\"')
                         {
-                            tokens.Add(intern);
-                            //tokens.Add(new Token(TokenType.STRINDICATOR, new int[1] { _pos }, "\"")); IDK WHY THIS WORKS!!!
                             break;
+                        } else {
+                            intern._value = intern._value + _essay[_pos];
+                            _pos = _pos + 1;
                         }
-
-                        intern._value = intern._value + _essay[_pos];
-                        _pos = _pos + 1;
                     }
+
+                    tokens.Add(intern);
 
                     _pos = _pos + 1;
                     continue;
@@ -190,16 +176,12 @@ public class Lexer
                     tokens.Add(cur_t);
                     cur_t = new Token((TokenType)0, new int[0], "");
 
-                    Token newtok = new Token(TokenType.CHARINDICATOR, new int[1] { _pos }, "\'");
-                    tokens.Add(newtok);
+                    //Token newtok = new Token(TokenType.CHARINDICATOR, new int[1] { _pos }, "\'");
+                    //tokens.Add(newtok);
+                    tokens.Add(new Token(TokenType.CHAR, new int[1] { _pos + 1 }, "" + _essay[_pos + 1]));
+                    //tokens.Add(new Token(TokenType.STRINDICATOR, new int[1] { _pos }, "\'"));
 
-                    _pos = _pos + 1;
-                    tokens.Add(new Token(TokenType.CHAR, new int[1] { _pos }, "" + _essay[_pos]));
-
-                    _pos = _pos + 1;
-                    tokens.Add(new Token(TokenType.STRINDICATOR, new int[1] { _pos }, "\'"));
-
-                    _pos = _pos + 1;
+                    _pos = _pos + 3;
                     continue;
                 }
 
