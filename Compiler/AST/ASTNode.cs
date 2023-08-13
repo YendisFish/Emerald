@@ -2,11 +2,11 @@ using Emerald.Types;
 
 namespace Emerald.AST;
 
-public abstract class ASTNode { }
+public class ASTNode { }
 
-public abstract class ExpressionNode : ASTNode { }
+public class ExpressionNode : ASTNode { }
 
-public abstract class StatementNode : ASTNode 
+public class StatementNode : ASTNode 
 { 
     public ExpressionNode baseExpression { get; set; }
 }
@@ -107,7 +107,7 @@ public class TextValueNode : ExpressionNode
 
 public class VariableExpressionNode : ExpressionNode
 {
-    public string varName { get; set; }
+    public string varName { get; set; } = "";
     public string type { get; set; } = "";
 }
 

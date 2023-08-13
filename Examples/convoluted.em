@@ -2,17 +2,12 @@
 
 reference standard;
 
-namespace Convoluted
-{
-    ruleset
-    {
-        unsafe;
-        unmanaged;
-    }
+ruleset;
 
-    void Main()
+int SomeFunction()
+{
+    while(1)
     {
-        char *out = "Hello World!";
-        print(out);
+        Alloc(sizeof(char) * 10);
     }
 }

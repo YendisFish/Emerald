@@ -1,8 +1,8 @@
 using Emerald.Types;
 using Emerald.AST;
+using System.Linq.Expressions;
 
 namespace Emerald.Parsing;
-
 
 public class Parser
 {
@@ -18,7 +18,12 @@ public class Parser
         AbstractSyntaxTree tree = new AbstractSyntaxTree();
         
         tree.nodes.Add(ParseRuleset());
-        tree.nodes.AddRange(ParseFunctionDeclarations());
+
+        List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
+        for(int i = 0; i < nodes.Count; i++)
+        {
+            tree.nodes.Add(nodes[i]);
+        }
         
         return tree;
     }
@@ -157,21 +162,7 @@ public class Parser
             }
 
             if(tokenSlice[i]._tp == TokenType.WORD)
-            {
-                /*
-                if(tokenSlice[i + 1]._tp == TokenType.WORD)
-                {
-                    node.type = tokenSlice[i]._value;
-                } else if(tokenSlice[i + 1]._tp != TokenType.OPERATOR) {
-                    node.name = tokenSlice[i]._value;
-                } else if(tokenSlice[i + 1]._tp == TokenType.OPERATOR)
-                {
-                    node.type = tokenSlice[i]._value + "*";
-                } else {
-                    node.name = tokenSlice[i]._value;
-                }*/
-
-                
+            {   
                 if(tokenSlice[i + 1]._tp == TokenType.WORD || tokenSlice[i + 1]._tp == TokenType.OPERATOR)
                 {
                     node.type = tokenSlice[i]._value;
@@ -186,4 +177,67 @@ public class Parser
 
         return nodes;
     }
+
+    public List<ASTNode> ParseFunctionBody(ref FunctionDeclarationNode decl)
+    {
+        List<ASTNode> nodes = new List<ASTNode>();
+        
+        int start = NavigateToFunction(decl.name) + 3; //this puts us in such a place that our next token is the first token in the function body
+
+        for(int i = start; i < toks.Count; i++)
+        {
+            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD)
+            {
+                VarDeclarationNode node = new();
+                i = ParseVarDeclaration(ref node, i);
+            }
+        }
+
+        return nodes;
+    }
+
+    public int NavigateToFunction(string name)
+    {
+        for(int i = 0; i < toks.Count; i++)
+        {
+            if(toks[i]._tp == TokenType.WORD && toks[i]._value == name)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public int ParseVarDeclaration(ref VarDeclarationNode node, int start)
+    {
+        node.type = toks[start]._value;
+        node.name = toks[start + 1]._value;
+        
+        start = start + 2;
+
+        if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "=")
+        {
+            start = start + 1;
+            
+            ExpressionNode expr = new ExpressionNode();
+            start = ParseExpression(ref expr, start);
+
+            VariableExpressionNode varNode = new();
+            varNode.varName = node.name;
+            varNode.type = node.type;
+
+            AssignmentNode asmNode = new();
+            asmNode.node = varNode;
+            asmNode.value = expr;
+
+            node.assignment = asmNode;
+        } else {
+            throw new Exception($"Could not parse variable declaration for variable {node.name}");
+        }
+
+        return start;
+    }
+
+    public int ParseExpression(ref ExpressionNode expr, int start) { return start; }
 }
