@@ -180,16 +180,41 @@ public class Parser
     }
 
     public void ParseFunctionBody(FunctionDeclarationNode decl)
-    {      
-        int start = NavigateToFunction(decl.name) + 3; //this puts us in such a place that our next token is the first token in the function body
+    {
+        int start = FindMatchingClosingParenthesis(NavigateToFunction(decl.name)) + 2; //this puts us in such a place that our next token is the first token in the function body
 
         for(int i = start; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD)
+            if(toks[i]._value == "return")
+            {
+                continue;
+            }
+
+            if(toks[i]._value == "while")
+            {
+                continue;
+            }
+
+            if(toks[i]._value == "if")
+            {
+                continue;
+            }
+
+            if(toks[i]._value == "switch")
+            {
+                continue;
+            }
+
+            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD || toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[i + 1]._value == "*")
             {
                 VarDeclarationNode node = new();
                 i = ParseVarDeclaration(ref node, i);
                 decl.body.Add(node);
+            }
+
+            if(toks[i]._tp == TokenType.RCBRACE)
+            {
+                break;
             }
         }
     }
@@ -210,14 +235,35 @@ public class Parser
     public int ParseVarDeclaration(ref VarDeclarationNode node, int start)
     {
         node.type = toks[start]._value;
-        node.name = toks[start + 1]._value;
         
-        start = start + 2;
+        start = start + 1;
+
+        if(toks[start]._tp == TokenType.WORD)
+        {
+            node.name = toks[start + 1]._value;
+        } else {
+            for(bool readingops = true; readingops; start++)
+            {
+                if(toks[start]._tp == TokenType.WORD)
+                {
+                    readingops = false;
+                    break;
+                } else {
+                    node.type = node.type + "*";
+                }
+            }
+        }
+        
+        node.name = toks[start]._value;
+
+        start = start + 1; //may need to be removed
 
         if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "=")
         {
             start = start + 1;
             
+            Console.WriteLine(toks[start]._value);
+
             ExpressionNode expr = new ExpressionNode();
             start = ParseExpression(ref expr, start);
 
@@ -228,7 +274,7 @@ public class Parser
             AssignmentNode asmNode = new();
             asmNode.node = varNode;
             asmNode.value = expr;
-            
+
             node.assignment = asmNode;
         } else {
             throw new Exception($"Could not parse variable declaration for variable {node.name}");
@@ -237,5 +283,13 @@ public class Parser
         return start;
     }
 
-    public int ParseExpression(ref ExpressionNode expr, int start) { return start; }
+    public int ParseExpression(ref ExpressionNode expr, int start) 
+    {
+        if(toks[start]._tp == TokenType.WORD)
+        {
+            //add handling for expression
+        }
+
+        return start; 
+    }
 }

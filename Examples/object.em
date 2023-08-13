@@ -1,40 +1,22 @@
+ruleset;
 
-//PROTOTYPE
-
-namespace Colors
+class Color
 {
-    ruleset default;
+    int r;
+    int g;
+    int b;
 
-    class Red
-    {
-        int r;
-        int g;
-        int b;
-
-        Red(default)
-        {
-            fields = default;
-        }
-    }
+    Color(default);
 }
 
-//CURRENT
-
-namespace Colors
+class FieldsClass
 {
-    rulset;
+    int x;
+    char y;
+    long *z;
 
-    class Red
+    FieldsClass()
     {
-        int r;
-        int g;
-        int b;
-
-        Red(int red, int green, int blue)
-        {
-            r = red;
-            g = green;
-            b = blue;
-        }
+        fields = void; //as long as the fields are basic types Emerald will auto fill them with their empty value
     }
 }
