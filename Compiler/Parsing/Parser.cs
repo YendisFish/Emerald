@@ -143,6 +143,30 @@ public class Parser
         return -1;
     }
 
+    public int FindMatchingClosingCBracket(int startIndex)
+    {
+        int nestCount = 0;
+        for(int i = startIndex; i < toks.Count; i++)
+        {
+            if(toks[i]._tp == TokenType.LBRACKET)
+            {
+                nestCount++;
+            }
+
+            if(toks[i]._tp == TokenType.RBRACKET)
+            {
+                nestCount--;
+
+                if(nestCount == 0)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public List<FunctionParameterNode> ParseFunctionParameters(int start, int end)
     {
         List<FunctionParameterNode> nodes = new();
