@@ -5,6 +5,7 @@ public /*record*/ class Token
     public TokenType _tp { get; set; }
     public int[] _positions { get; set; }
     public string _value { get; set; }
+    public string _metadata { get; set; } = "";
 
     public Token(TokenType tp, int[] positions, string value)
     {

@@ -309,11 +309,52 @@ public class Parser
 
     public int ParseExpression(ref ExpressionNode expr, int start) 
     {
-        if(toks[start]._tp == TokenType.WORD)
+        List<Token> n;
+        start = FindExpressionEnd(start, out n);
+        
+        if(start is not -1)
         {
-            //add handling for expression
+            for(int i = 0; i < n.Count; i++)
+            {
+                
+            }
+        } else {
+            throw new Exception("Failed to parse Expression!");
         }
 
         return start; 
+    }
+
+    public int FindExpressionEnd(int start, out List<Token> segment)
+    {
+        segment = new();
+
+        int parenthesisCount = 0;
+        for(int i = start; i < toks.Count; i++)
+        {
+            if(toks[i]._value == ";")
+            {
+                return i;
+            }
+
+            if(toks[i]._tp == TokenType.LPAREN)
+            {
+                parenthesisCount = parenthesisCount + 1;
+            }
+
+            if(toks[i]._tp == TokenType.RPAREN)
+            {
+                parenthesisCount = parenthesisCount - 1;
+                
+                if(parenthesisCount < 1)
+                {
+                    return i;
+                }
+            }
+
+            segment.Add(toks[i]);
+        }
+
+        return -1;
     }
 }

@@ -1,21 +1,18 @@
-namespace MyExampleHelloWorld
+
+//here we create a custom ruleset just to emphasize some points of the language
+ruleset
 {
-    //here we create a custom ruleset just to emphasize some points of the language
-    ruleset
-    {
-        stackpreferred;
-        unsafe; //tolerate pointers, however, since we do not have the "unmanaged" flag, they will be managed pointers
-        //we cant actually use selfalloc here because that is a heap specific value
-    }
-
-    void Main()
-    {
-        string out = allocate_str(12); //returns a char** but the compiler will take care of conversions for us
-        out = "Hello World!"; //this can be applied to string and char**
-
-        print("Hello World!"); //can accept pointers or values
-    }
+    stackpreferred;
+    unsafe; //tolerate pointers, however, since we do not have the "unmanaged" flag, they will be managed pointers
+    //we cant actually use selfalloc here because that is a heap specific value
 }
+
+void Main()
+{
+    char *str = "Hello World!";
+    print(str);
+}
+
 
 /*
 
