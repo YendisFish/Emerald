@@ -66,7 +66,9 @@ public class Parser
             //parse n into its generic types
         }
         
-        for(; start < toks.Count; start++)
+        int end = FindMatchingClosingCBracket(start - 1);
+
+        for(; start <= end; start++)
         {
             if(toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.WORD || toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.OPERATOR)
             {
@@ -76,10 +78,6 @@ public class Parser
                 node.vars.Add(field);
             }
 
-            if(toks[start]._tp == TokenType.RCBRACE)
-            {
-                break;
-            }
         }
 
         return node;
@@ -196,7 +194,6 @@ public class Parser
                 }
 
                 i = FindOperatorChainEnd(i);
-                Console.WriteLine(toks[i]._value);
                 func.name = toks[i]._value;
                 
                 int opened = i + 1;
@@ -260,12 +257,12 @@ public class Parser
         int nestCount = 0;
         for(int i = startIndex; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.LBRACKET)
+            if(toks[i]._tp == TokenType.LCBRACE)
             {
                 nestCount++;
             }
 
-            if(toks[i]._tp == TokenType.RBRACKET)
+            if(toks[i]._tp == TokenType.RCBRACE)
             {
                 nestCount--;
 
