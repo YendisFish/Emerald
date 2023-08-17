@@ -1,6 +1,7 @@
 using Emerald.Types;
 using Emerald.AST;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 
 namespace Emerald.Parsing;
 
@@ -19,6 +20,9 @@ public class Parser
         
         tree.nodes.Add(ParseRuleset());
 
+        List<StructDeclarationNode> structs = ParseStructs();
+        tree.nodes.AddRange(structs);
+
         List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
         for(int i = 0; i < nodes.Count; i++)
         {
@@ -27,6 +31,79 @@ public class Parser
         }
         
         return tree;
+    }
+
+    public List<StructDeclarationNode> ParseStructs()
+    {
+        List<StructDeclarationNode> structs = new();
+        
+        for(int i = 0; i < toks.Count; i++)
+        {
+            if(toks[i]._value == "struct")
+            {
+                StructDeclarationNode node = ParseStruct(i);
+                structs.Add(node);
+            }
+        }
+
+        return structs;
+    }
+
+    public StructDeclarationNode ParseStruct(int start)
+    {
+        StructDeclarationNode node = new();
+        //parse the boilerplate of the struct
+
+        start = start + 1;
+        node.structName = toks[start]._value;
+        start = start + 1;
+
+        if(toks[start]._value == "<")
+        {
+            List<Token> n = new();
+            start = FindMatchingClosingVBracket(start, ref n);
+
+            //parse n into its generic types
+        }
+        
+        for(; start < toks.Count; start++)
+        {
+            if(toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.WORD || toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.OPERATOR)
+            {
+                //parse a struct field
+                StructFieldNode field = new();
+                start = ParseFieldDeclaration(start, ref field);
+                node.vars.Add(field);
+            }
+        }
+
+        return node;
+    }
+
+    public int ParseFieldDeclaration(int start, ref StructFieldNode node)
+    {
+        List<Token> field = new();
+        int end = FindExpressionEnd(start, out field);
+
+        node.type = toks[start]._value;
+        start++;
+
+        for(; start < end; start++)
+        {
+            if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "*")
+            {
+                node.type = node.type + "*";
+            } else if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "<")
+            {
+                //take care of generic type
+            } else {
+                Console.WriteLine(toks[start]._value);
+                node.name = toks[start]._value;
+                break;
+            }
+        }
+
+        return start;
     }
 
     public RulesetNode ParseRuleset()
@@ -167,6 +244,21 @@ public class Parser
         return -1;
     }
 
+    public int FindMatchingClosingVBracket(int startIndex, ref List<Token> toks)
+    {
+        for(int i = startIndex; i < toks.Count; i++)
+        {
+            if(toks[i]._value == ">")
+            {
+                return i;
+            } else {
+                toks.Add(toks[i]);
+            }
+        }
+
+        return -1;
+    }
+
     public List<FunctionParameterNode> ParseFunctionParameters(int start, int end)
     {
         List<FunctionParameterNode> nodes = new();
@@ -265,6 +357,7 @@ public class Parser
         if(toks[start]._tp == TokenType.WORD)
         {
             node.name = toks[start + 1]._value;
+            start = start + 1;
         } else {
             for(bool readingops = true; readingops; start++)
             {
@@ -316,13 +409,29 @@ public class Parser
         {
             for(int i = 0; i < n.Count; i++)
             {
-                
+                switch(n[i]._tp)
+                {
+                    case TokenType.STRING:
+                    {
+                        break;
+                    }
+
+                    case TokenType.CHAR:
+                    {
+                        break;
+                    }
+
+                    case TokenType.WORD: //handle literally every other type of value
+                    {
+                        break;
+                    }
+                }
             }
         } else {
             throw new Exception("Failed to parse Expression!");
         }
 
-        return start; 
+        return start;
     }
 
     public int FindExpressionEnd(int start, out List<Token> segment)

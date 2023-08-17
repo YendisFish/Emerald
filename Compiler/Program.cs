@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("ruleset; void Main(int arglen, char **args) { char *ptr = \"Hello World!\"; int x = 4 + (6 / 3); print(ptr); return 0; }  int GetInt(int int1) { return int1 + 3; }"); //i dont want to write any external files rn
+Lexer lex = new("ruleset; struct { int test; char **text; }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 List<Token> nowhitespace = new();
@@ -58,6 +58,15 @@ foreach(ASTNode node in tree.nodes)
         {
             VarDeclarationNode varNode = (VarDeclarationNode)funcMember;
             Console.WriteLine($"TP: {varNode.type} | NM: {varNode.name}");
+        }
+    }
+
+    if(node is StructDeclarationNode)
+    {
+        Console.WriteLine("Found Struct!");
+        foreach(StructFieldNode n in ((StructDeclarationNode)node).vars)
+        {
+            Console.WriteLine($"TP: {n.type} NM: {n.name}");
         }
     }
 }

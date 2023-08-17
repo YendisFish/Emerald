@@ -1,3 +1,4 @@
+using System.Data;
 using System.Net.Http.Headers;
 using Emerald.Types;
 
@@ -31,19 +32,22 @@ public class ConstantNode : ASTNode
     public object value { get; set; } = "";
 }
 
-#region Classes
+#region Structs
 
-public class ClassNode : ASTNode
+public class StructDeclarationNode : ASTNode
 {
-    public string typename { get; set; } = "";
-    public bool isGeneric { get; set; } = false;
-    public ConstructorNode constructor { get; set; } = new();
+    public string structName { get; set; } = "";
+    public List<StructFieldNode> vars { get; set; } = new();
+    public bool canBeGeneric { get; set; } = false;
+    public List<string> genericNames { get; set; } = new(); 
 }
 
-public class ConstructorNode : ASTNode
+public class StructFieldNode : ASTNode
 {
-    public bool isdefault { get; set; } = false;
-    public List<ASTNode> body { get; set; } = new();
+    public string name { get; set; } = "";
+    public string type { get; set; } = "";
+    public bool isGeneric { get; set; } = false;
+    public string genericType { get; set; } = "";
 }
 
 #endregion
@@ -73,6 +77,8 @@ public class VarDeclarationNode : StatementNode
     public string type { get; set; } = "";
     public string name { get; set; } = "";
     public AssignmentNode assignment { get; set; } = new();
+    public bool isGeneric { get; set; } = false;
+    public string genericType { get; set; } = "";
 }
 
 //use the baseExpression value to set this value

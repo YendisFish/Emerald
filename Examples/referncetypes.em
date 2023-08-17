@@ -1,10 +1,10 @@
 reference io; //import
 reference name myclasslib; //"namespace" C# equivelant
 
-class MyClass
+struct MyStruct
 {
     int val;
     char val2;
 
-    MyClass(default);
+    MyStruct(default);
 }
