@@ -26,7 +26,7 @@ public class Parser
         List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
         for(int i = 0; i < nodes.Count; i++)
         {
-            ParseFunctionBody(nodes[i]);
+            //ParseFunctionBody(nodes[i]);
             tree.nodes.Add(nodes[i]);
         }
         
@@ -75,6 +75,11 @@ public class Parser
                 start = ParseFieldDeclaration(start, ref field);
                 node.vars.Add(field);
             }
+
+            if(toks[start]._tp == TokenType.RCBRACE)
+            {
+                break;
+            }
         }
 
         return node;
@@ -97,7 +102,6 @@ public class Parser
             {
                 //take care of generic type
             } else {
-                Console.WriteLine(toks[start]._value);
                 node.name = toks[start]._value;
                 break;
             }
@@ -176,24 +180,55 @@ public class Parser
 
         for(int i = 0; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD && toks[i + 2]._tp == TokenType.LPAREN)
+            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD && toks[i + 2]._tp == TokenType.LPAREN || 
+            toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[FindOperatorChainEnd(i + 1)]._tp == TokenType.WORD && toks[FindOperatorChainEnd(i + 1) + 1]._tp == TokenType.LPAREN)
             {
                 FunctionDeclarationNode func = new FunctionDeclarationNode();
                 func.returnType = toks[i]._value;
-                func.name = toks[i + 1]._value;
+
+                i++;
+
+                int numPtrs = FindOperatorChainEnd(i) - i;
+
+                for(; numPtrs > 0; numPtrs--)
+                {
+                    func.returnType = func.returnType + "*";
+                }
+
+                i = FindOperatorChainEnd(i);
+                Console.WriteLine(toks[i]._value);
+                func.name = toks[i]._value;
                 
-                int opened = i + 2;
-                int closed = FindMatchingClosingParenthesis(i + 2);
+                int opened = i + 1;
+                int closed = FindMatchingClosingParenthesis(opened);
 
                 if(closed is -1) throw new Exception($"Function {toks[i + 1]._value} was never closed!");
 
-                func.parameters = ParseFunctionParameters(opened, closed);
+                if(closed != opened + 1)
+                {
+                    func.parameters = ParseFunctionParameters(opened, closed);
+                } else {
+                    func.parameters = new();
+                }
 
                 nodes.Add(func);
             }
         }
 
         return nodes;
+    }
+
+    public int FindOperatorChainEnd(int start)
+    {
+        for(; start < toks.Count; start++)
+        {
+            if(toks[start]._tp != TokenType.OPERATOR)
+            {
+                return start;
+            }
+        }
+
+        return -1;
     }
 
     public int FindMatchingClosingParenthesis(int startIndex)

@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 Token[] toks = new Token[] {};
 
-Lexer lex = new("ruleset; struct { int test; char **text; }"); //i dont want to write any external files rn
+Lexer lex = new("ruleset; struct { int test; char **text; } int *main() { return 0; }"); //i dont want to write any external files rn
 lex.Parse(out toks); //this should operate pretty quickly due to the pointer
 
 List<Token> nowhitespace = new();
