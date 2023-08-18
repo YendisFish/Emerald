@@ -2,6 +2,7 @@ using Emerald.Types;
 using Emerald.AST;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 namespace Emerald.Parsing;
 
@@ -60,8 +61,18 @@ public class Parser
 
         if(toks[start]._value == "<")
         {
+            node.canBeGeneric = true;
+
             List<Token> n = new();
             start = FindMatchingClosingVBracket(start, ref n);
+
+            foreach(Token val in n)
+            {
+                if(val._tp == TokenType.WORD)
+                {
+                    node.genericNames.Add(val._value);
+                }
+            }
 
             //parse n into its generic types
         }
@@ -78,6 +89,10 @@ public class Parser
                 node.vars.Add(field);
             }
 
+            if(toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.LPAREN)
+            {
+                //parse struct constructor
+            }
         }
 
         return node;
@@ -276,15 +291,16 @@ public class Parser
         return -1;
     }
 
-    public int FindMatchingClosingVBracket(int startIndex, ref List<Token> toks)
+    public int FindMatchingClosingVBracket(int startIndex, ref List<Token> token)
     {
-        for(int i = startIndex; i < toks.Count; i++)
+        for(; startIndex < toks.Count; startIndex++)
         {
-            if(toks[i]._value == ">")
+            if(toks[startIndex]._value == ">")
             {
-                return i;
+                token.Add(toks[startIndex]);
+                return startIndex;
             } else {
-                toks.Add(toks[i]);
+                token.Add(toks[startIndex]);
             }
         }
 
