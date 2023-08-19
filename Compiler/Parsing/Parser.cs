@@ -18,29 +18,29 @@ public class Parser
     public AbstractSyntaxTree Parse()
     {
         AbstractSyntaxTree tree = new AbstractSyntaxTree();
-        
+
         tree.nodes.Add(ParseRuleset());
 
         List<StructDeclarationNode> structs = ParseStructs();
         tree.nodes.AddRange(structs);
 
         List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
-        for(int i = 0; i < nodes.Count; i++)
+        for (int i = 0; i < nodes.Count; i++)
         {
             //ParseFunctionBody(nodes[i]);
             tree.nodes.Add(nodes[i]);
         }
-        
+
         return tree;
     }
 
     public List<StructDeclarationNode> ParseStructs()
     {
         List<StructDeclarationNode> structs = new();
-        
-        for(int i = 0; i < toks.Count; i++)
+
+        for (int i = 0; i < toks.Count; i++)
         {
-            if(toks[i]._value == "struct")
+            if (toks[i]._value == "struct")
             {
                 StructDeclarationNode node = ParseStruct(i);
                 structs.Add(node);
@@ -59,16 +59,16 @@ public class Parser
         node.structName = toks[start]._value;
         start = start + 1;
 
-        if(toks[start]._value == "<")
+        if (toks[start]._value == "<")
         {
             node.canBeGeneric = true;
 
             List<Token> n = new();
             start = FindMatchingClosingVBracket(start, ref n);
 
-            foreach(Token val in n)
+            foreach (Token val in n)
             {
-                if(val._tp == TokenType.WORD)
+                if (val._tp == TokenType.WORD)
                 {
                     node.genericNames.Add(val._value);
                 }
@@ -76,12 +76,12 @@ public class Parser
 
             //parse n into its generic types
         }
-        
+
         int end = FindMatchingClosingCBracket(start - 1);
 
-        for(; start <= end; start++)
+        for (; start <= end; start++)
         {
-            if(toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.WORD || toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.OPERATOR)
+            if (toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.WORD || toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.OPERATOR)
             {
                 //parse a struct field
                 StructFieldNode field = new();
@@ -89,7 +89,7 @@ public class Parser
                 node.vars.Add(field);
             }
 
-            if(toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.LPAREN)
+            if (toks[start]._tp == TokenType.WORD && toks[start + 1]._tp == TokenType.LPAREN)
             {
                 //parse struct constructor
             }
@@ -106,15 +106,18 @@ public class Parser
         node.type = toks[start]._value;
         start++;
 
-        for(; start < end; start++)
+        for (; start < end; start++)
         {
-            if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "*")
+            if (toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "*")
             {
                 node.type = node.type + "*";
-            } else if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "<")
+            }
+            else if (toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "<")
             {
                 //take care of generic type
-            } else {
+            }
+            else
+            {
                 node.name = toks[start]._value;
                 break;
             }
@@ -127,59 +130,63 @@ public class Parser
     {
         RulesetNode ruleset = new RulesetNode();
 
-        for(int i = 0; i < toks.Count; i++)
+        for (int i = 0; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.WORD && toks[i]._value == "ruleset")
+            if (toks[i]._tp == TokenType.WORD && toks[i]._value == "ruleset")
             {
-                for(bool search = true; search != false; i++)
+                for (bool search = true; search != false; i++)
                 {
-                    switch(toks[i]._tp)
+                    switch (toks[i]._tp)
                     {
                         case TokenType.SEMICOLON:
-                        {
-                            if(toks[i - 1]._value == "ruleset")
                             {
-                                ruleset.rungc = true;
-                                ruleset.stackPreferred = true;
-                                ruleset.heapPreferred = false;
-                                
-                                search = false;
-                                break;
-                            } else {
-                                continue;
+                                if (toks[i - 1]._value == "ruleset")
+                                {
+                                    ruleset.rungc = true;
+                                    ruleset.stackPreferred = true;
+                                    ruleset.heapPreferred = false;
+
+                                    search = false;
+                                    break;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
                             }
-                        }
 
                         case TokenType.WORD:
-                        {
-                            if(toks[i]._value == "heappreferred")
                             {
-                                ruleset.heapPreferred = true;
-                            }
+                                if (toks[i]._value == "heappreferred")
+                                {
+                                    ruleset.heapPreferred = true;
+                                }
 
-                            if(toks[i]._value == "stackpreferred")
-                            {
-                                ruleset.stackPreferred = true;
-                            }
+                                if (toks[i]._value == "stackpreferred")
+                                {
+                                    ruleset.stackPreferred = true;
+                                }
 
-                            if(toks[i]._value == "rungc")
-                            {
-                                ruleset.rungc = true;
-                            }
+                                if (toks[i]._value == "rungc")
+                                {
+                                    ruleset.rungc = true;
+                                }
 
-                            continue;
-                        }
+                                continue;
+                            }
 
                         case TokenType.RCBRACE:
-                        {
-                            search = false;
-                            break;
-                        }
+                            {
+                                search = false;
+                                break;
+                            }
                     }
                 }
 
                 break;
-            } else {
+            }
+            else
+            {
                 throw new Exception("Could not parse ruleset! It looks like you are missing a semicolon or braces!");
             }
         }
@@ -191,9 +198,9 @@ public class Parser
     {
         List<FunctionDeclarationNode> nodes = new();
 
-        for(int i = 0; i < toks.Count; i++)
+        for (int i = 0; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD && toks[i + 2]._tp == TokenType.LPAREN || 
+            if (toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD && toks[i + 2]._tp == TokenType.LPAREN ||
             toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[FindOperatorChainEnd(i + 1)]._tp == TokenType.WORD && toks[FindOperatorChainEnd(i + 1) + 1]._tp == TokenType.LPAREN)
             {
                 FunctionDeclarationNode func = new FunctionDeclarationNode();
@@ -203,23 +210,25 @@ public class Parser
 
                 int numPtrs = FindOperatorChainEnd(i) - i;
 
-                for(; numPtrs > 0; numPtrs--)
+                for (; numPtrs > 0; numPtrs--)
                 {
                     func.returnType = func.returnType + "*";
                 }
 
                 i = FindOperatorChainEnd(i);
                 func.name = toks[i]._value;
-                
+
                 int opened = i + 1;
                 int closed = FindMatchingClosingParenthesis(opened);
 
-                if(closed is -1) throw new Exception($"Function {toks[i + 1]._value} was never closed!");
+                if (closed is -1) throw new Exception($"Function {toks[i + 1]._value} was never closed!");
 
-                if(closed != opened + 1)
+                if (closed != opened + 1)
                 {
                     func.parameters = ParseFunctionParameters(opened, closed);
-                } else {
+                }
+                else
+                {
                     func.parameters = new();
                 }
 
@@ -232,9 +241,9 @@ public class Parser
 
     public int FindOperatorChainEnd(int start)
     {
-        for(; start < toks.Count; start++)
+        for (; start < toks.Count; start++)
         {
-            if(toks[start]._tp != TokenType.OPERATOR)
+            if (toks[start]._tp != TokenType.OPERATOR)
             {
                 return start;
             }
@@ -246,18 +255,18 @@ public class Parser
     public int FindMatchingClosingParenthesis(int startIndex)
     {
         int nestCount = 0;
-        for(int i = startIndex; i < toks.Count; i++)
+        for (int i = startIndex; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.LPAREN)
+            if (toks[i]._tp == TokenType.LPAREN)
             {
                 nestCount++;
             }
 
-            if(toks[i]._tp == TokenType.RPAREN)
+            if (toks[i]._tp == TokenType.RPAREN)
             {
                 nestCount--;
 
-                if(nestCount == 0)
+                if (nestCount == 0)
                 {
                     return i;
                 }
@@ -270,18 +279,18 @@ public class Parser
     public int FindMatchingClosingCBracket(int startIndex)
     {
         int nestCount = 0;
-        for(int i = startIndex; i < toks.Count; i++)
+        for (int i = startIndex; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.LCBRACE)
+            if (toks[i]._tp == TokenType.LCBRACE)
             {
                 nestCount++;
             }
 
-            if(toks[i]._tp == TokenType.RCBRACE)
+            if (toks[i]._tp == TokenType.RCBRACE)
             {
                 nestCount--;
 
-                if(nestCount == 0)
+                if (nestCount == 0)
                 {
                     return i;
                 }
@@ -293,13 +302,15 @@ public class Parser
 
     public int FindMatchingClosingVBracket(int startIndex, ref List<Token> token)
     {
-        for(; startIndex < toks.Count; startIndex++)
+        for (; startIndex < toks.Count; startIndex++)
         {
-            if(toks[startIndex]._value == ">")
+            if (toks[startIndex]._value == ">")
             {
                 token.Add(toks[startIndex]);
                 return startIndex;
-            } else {
+            }
+            else
+            {
                 token.Add(toks[startIndex]);
             }
         }
@@ -313,25 +324,27 @@ public class Parser
         List<Token> tokenSlice = toks.GetRange(start, end - start);
 
         FunctionParameterNode node = new();
-        for(int i = 1; i < tokenSlice.Count - 1; i++)
+        for (int i = 1; i < tokenSlice.Count - 1; i++)
         {
-            if(tokenSlice[i]._tp == TokenType.COMMA)
+            if (tokenSlice[i]._tp == TokenType.COMMA)
             {
                 nodes.Add(node);
                 node = new();
             }
 
-            if(tokenSlice[i]._tp == TokenType.OPERATOR)
+            if (tokenSlice[i]._tp == TokenType.OPERATOR)
             {
                 node.type = node.type + "*";
             }
 
-            if(tokenSlice[i]._tp == TokenType.WORD)
-            {   
-                if(tokenSlice[i + 1]._tp == TokenType.WORD || tokenSlice[i + 1]._tp == TokenType.OPERATOR)
+            if (tokenSlice[i]._tp == TokenType.WORD)
+            {
+                if (tokenSlice[i + 1]._tp == TokenType.WORD || tokenSlice[i + 1]._tp == TokenType.OPERATOR)
                 {
                     node.type = tokenSlice[i]._value;
-                } else if(tokenSlice[i + 1]._tp == TokenType.COMMA) {
+                }
+                else if (tokenSlice[i + 1]._tp == TokenType.COMMA)
+                {
                     node.name = tokenSlice[i]._value;
                 }
             }
@@ -347,36 +360,36 @@ public class Parser
     {
         int start = FindMatchingClosingParenthesis(NavigateToFunction(decl.name)) + 2; //this puts us in such a place that our next token is the first token in the function body
 
-        for(int i = start; i < toks.Count; i++)
+        for (int i = start; i < toks.Count; i++)
         {
-            if(toks[i]._value == "return")
+            if (toks[i]._value == "return")
             {
                 continue;
             }
 
-            if(toks[i]._value == "while")
+            if (toks[i]._value == "while")
             {
                 continue;
             }
 
-            if(toks[i]._value == "if")
+            if (toks[i]._value == "if")
             {
                 continue;
             }
 
-            if(toks[i]._value == "switch")
+            if (toks[i]._value == "switch")
             {
                 continue;
             }
 
-            if(toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD || toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[i + 1]._value == "*")
+            if (toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD || toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[i + 1]._value == "*")
             {
                 VarDeclarationNode node = new();
                 i = ParseVarDeclaration(ref node, i);
                 decl.body.Add(node);
             }
 
-            if(toks[i]._tp == TokenType.RCBRACE)
+            if (toks[i]._tp == TokenType.RCBRACE)
             {
                 break;
             }
@@ -385,9 +398,9 @@ public class Parser
 
     public int NavigateToFunction(string name)
     {
-        for(int i = 0; i < toks.Count; i++)
+        for (int i = 0; i < toks.Count; i++)
         {
-            if(toks[i]._tp == TokenType.WORD && toks[i]._value == name)
+            if (toks[i]._tp == TokenType.WORD && toks[i]._value == name)
             {
                 return i;
             }
@@ -399,38 +412,42 @@ public class Parser
     public int ParseVarDeclaration(ref VarDeclarationNode node, int start)
     {
         node.type = toks[start]._value;
-        
+
         start = start + 1;
 
-        if(toks[start]._tp == TokenType.WORD)
+        if (toks[start]._tp == TokenType.WORD)
         {
             node.name = toks[start + 1]._value;
             start = start + 1;
-        } else {
-            for(bool readingops = true; readingops; start++)
+        }
+        else
+        {
+            for (bool readingops = true; readingops; start++)
             {
-                if(toks[start]._tp == TokenType.WORD)
+                if (toks[start]._tp == TokenType.WORD)
                 {
                     readingops = false;
                     break;
-                } else {
+                }
+                else
+                {
                     node.type = node.type + "*";
                 }
             }
         }
-        
+
         node.name = toks[start]._value;
 
         start = start + 1; //may need to be removed
 
-        if(toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "=")
+        if (toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "=")
         {
             start = start + 1;
-            
+
             Console.WriteLine(toks[start]._value);
 
             ExpressionNode expr = new ExpressionNode();
-            start = ParseExpression(ref expr, start);
+            start = ParseExpression(ref expr, start, node.type);
 
             VariableExpressionNode varNode = new();
             varNode.varName = node.name;
@@ -441,45 +458,86 @@ public class Parser
             asmNode.value = expr;
 
             node.assignment = asmNode;
-        } else {
+        }
+        else
+        {
             throw new Exception($"Could not parse variable declaration for variable {node.name}");
         }
 
         return start;
     }
 
-    public int ParseExpression(ref ExpressionNode expr, int start) 
+    public int ParseExpression(ref ExpressionNode expr, int start, string type)
     {
         List<Token> n;
         start = FindExpressionEnd(start, out n);
-        
-        if(start is not -1)
+
+        if (start is not -1 && n.Count < 2)
         {
-            for(int i = 0; i < n.Count; i++)
+            switch (n[0]._tp)
             {
-                switch(n[i]._tp)
+                case TokenType.STRING:
                 {
-                    case TokenType.STRING:
+                    expr = new TextValueNode();
+                    ((TextValueNode)expr).type = "string";
+                    ((TextValueNode)expr).value = n[0]._value;
+
+                    break;
+                }
+
+                case TokenType.CHAR:
+                {
+                    expr = new TextValueNode();
+                    ((TextValueNode)expr).type = "char";
+                    ((TextValueNode)expr).value = n[0]._value[0];
+
+                    break;
+                }
+
+                case TokenType.WORD: //handle literally every other type of value
+                {
+                    long checker = long.Parse(n[0]._value);
+                    
+                    try
                     {
-                        break;
+                        if(checker > int.MaxValue)
+                        {
+                            expr = new TextValueNode();
+                            ((TextValueNode)expr).type = "int";
+                            ((TextValueNode)expr).value = int.Parse(n[0]._value);
+                        } else {
+                            expr = new TextValueNode();
+                            ((TextValueNode)expr).type = "long";
+                            ((TextValueNode)expr).value = long.Parse(n[0]._value);
+                        }
+                    } catch
+                    {
+                        try
+                        {
+                            VariableExpressionNode node = expr as VariableExpressionNode;
+                            node!.type = type;
+                            node.varName = n[0]._value;
+                        } catch
+                        {
+                            throw new Exception($"Could not parse expression! Token: {n[0]._value}");
+                        }
                     }
 
-                    case TokenType.CHAR:
-                    {
-                        break;
-                    }
-
-                    case TokenType.WORD: //handle literally every other type of value
-                    {
-                        break;
-                    }
+                    break;
                 }
             }
-        } else {
-            throw new Exception("Failed to parse Expression!");
+        }
+        else
+        {
+            ParseComplicatedExpression(); // add args for func
         }
 
         return start;
+    }
+
+    public void ParseComplicatedExpression()
+    {
+        //need to parse this if expressions are multi token
     }
 
     public int FindExpressionEnd(int start, out List<Token> segment)
@@ -487,23 +545,23 @@ public class Parser
         segment = new();
 
         int parenthesisCount = 0;
-        for(int i = start; i < toks.Count; i++)
+        for (int i = start; i < toks.Count; i++)
         {
-            if(toks[i]._value == ";")
+            if (toks[i]._value == ";")
             {
                 return i;
             }
 
-            if(toks[i]._tp == TokenType.LPAREN)
+            if (toks[i]._tp == TokenType.LPAREN)
             {
                 parenthesisCount = parenthesisCount + 1;
             }
 
-            if(toks[i]._tp == TokenType.RPAREN)
+            if (toks[i]._tp == TokenType.RPAREN)
             {
                 parenthesisCount = parenthesisCount - 1;
-                
-                if(parenthesisCount < 1)
+
+                if (parenthesisCount < 1)
                 {
                     return i;
                 }
