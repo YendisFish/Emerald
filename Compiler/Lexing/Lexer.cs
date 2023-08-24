@@ -246,6 +246,62 @@ public class Lexer
                     continue;
                 }
 
+                case '&':
+                {
+                    if(_essay[_pos + 1] == '&')
+                    {
+                        Console.WriteLine("FOUND DOUBLE TOKEN");
+
+                        tokens.Add(cur_t);
+                        cur_t = new Token((TokenType)0, new int[0], "");
+
+                        Token newtok = new Token(TokenType.OPERATOR, new int[1] { _pos }, "&&");
+                        tokens.Add(newtok);
+                        
+                        _pos = _pos + 2;
+                    } else {
+                        tokens.Add(cur_t);
+                        cur_t = new Token((TokenType)0, new int[0], "");
+
+                        Token newtok = new Token(TokenType.OPERATOR, new int[1] { _pos }, "&");
+                        tokens.Add(newtok);
+
+                        _pos = _pos + 1;
+                    }
+
+                    continue;
+                }
+
+                case '|':
+                {
+                    if(_essay[_pos + 1] == '|')
+                    {
+                        tokens.Add(cur_t);
+                        cur_t = new Token((TokenType)0, new int[0], "");
+
+                        Token newtok = new Token(TokenType.OPERATOR, new int[1] { _pos }, "|");
+                        tokens.Add(newtok);
+                        
+                        _pos = _pos + 1;
+                    } else {
+                        throw new Exception($"Encountered invalid token! {_essay[_pos]} : {_pos}");
+                    }
+
+                    continue;
+                }
+
+                case '!':
+                {
+                    tokens.Add(cur_t);
+                    cur_t = new Token((TokenType)0, new int[0], "");
+
+                    Token newtok = new Token(TokenType.OPERATOR, new int[1] { _pos }, "!");
+                    tokens.Add(newtok);
+                    
+                    _pos = _pos + 1;
+                    continue;
+                }
+
                 case '%':
                 {
                     tokens.Add(cur_t);
@@ -276,8 +332,14 @@ public class Lexer
                     cur_t = new Token((TokenType)0, new int[0], "");
 
                     Token newtok = new Token(TokenType.OPERATOR, new int[1] { _pos }, "*");
+
+                    if(_essay[_pos + 1] == ' ')
+                    {
+                        newtok._metadata = "mult";
+                    }
+
                     tokens.Add(newtok);
-                    
+
                     _pos = _pos + 1;
                     continue;
                 }

@@ -1,8 +1,7 @@
 using Emerald.Types;
 using Emerald.AST;
-using System.Linq.Expressions;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
+using System.Data.Common;
 
 namespace Emerald.Parsing;
 
@@ -276,6 +275,30 @@ public class Parser
         return -1;
     }
 
+    public int FindMatchingClosingParenthesis(int startIndex, ref List<Token> tokens)
+    {
+        int nestCount = 0;
+        for (int i = startIndex; i < tokens.Count; i++)
+        {
+            if (tokens[i]._tp == TokenType.LPAREN)
+            {
+                nestCount++;
+            }
+
+            if (tokens[i]._tp == TokenType.RPAREN)
+            {
+                nestCount--;
+
+                if (nestCount == 0)
+                {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
     public int FindMatchingClosingCBracket(int startIndex)
     {
         int nestCount = 0;
@@ -514,7 +537,10 @@ public class Parser
                     {
                         try
                         {
-                            VariableExpressionNode node = expr as VariableExpressionNode;
+                            VariableExpressionNode? node = expr as VariableExpressionNode;
+
+                            if(node is null) throw new Exception();
+
                             node!.type = type;
                             node.varName = n[0]._value;
                         } catch
@@ -529,15 +555,93 @@ public class Parser
         }
         else
         {
-            ParseComplicatedExpression(); // add args for func
+            ParseComplicatedExpression(ref expr, ref n); // add args for func
         }
 
         return start;
     }
 
-    public void ParseComplicatedExpression()
+    public void ParseComplicatedExpression(ref ExpressionNode expr, ref List<Token> n)
     {
-        //need to parse this if expressions are multi token
+        List<Token[]> tokenSegments = new();
+
+        for(int i = 0; i < n.Count; i++)
+        {
+            int prec = 0;
+            if(n[i]._tp == TokenType.OPERATOR)
+            {
+                if(n[i]._value == "&&" || n[i]._value == "<" || n[i]._value == ">" || n[i]._value == "||")
+                {
+                    throw new Exception("Ternaries are stupid!");
+                }
+
+                if(n[i]._value == "*" && n[i]._metadata != "mult")
+                {
+                    continue;
+                }
+
+                prec = DeterminePEMDAS(n[i]._value);
+            }
+            
+            //this is how we know we are reading a function
+            if(n[i]._tp == TokenType.WORD && n[i + 1]._value == "(")
+            {
+                i = FindMatchingClosingParenthesis(i + 1, ref n);
+                continue;
+            }
+        }
+    }
+
+    public int DeterminePEMDAS(string val)
+    {
+        switch(val)
+        {
+            case "(":
+            {
+                return 1;
+            }
+
+            case "*":
+            {
+                return 2;
+            }
+
+            case "/":
+            {
+                return 3;
+            }
+
+            case "+":
+            {
+                return 4;
+            }
+
+            case "-":
+            {
+                return 5;
+            }
+        }
+
+        return -1; 
+    }
+
+    public Tuple<Token[], Token[]> SplitToks(List<Token> list, int splitIndex)
+    {
+        List<Token> slice1 = new();
+        List<Token> slice2 = new();
+
+        for(int i = 0; i < list.Count; i++)
+        {
+            if(i >= splitIndex)
+            {
+                slice2.Add(list[i]);
+                continue;
+            }
+
+            slice1.Add(list[i]);
+        }
+
+        return new(slice1.ToArray(), slice2.ToArray());
     }
 
     public int FindExpressionEnd(int start, out List<Token> segment)
