@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Emerald.Types;
 
 namespace Emerald.Lexing;
@@ -346,6 +347,18 @@ public class Lexer
 
                 case '<':
                 {
+                    if(_essay[_pos + 1] == '=')
+                    {
+                        tokens.Add(cur_t);
+                        cur_t = new Token((TokenType)0, new int[0], "");
+
+                        Token nt = new Token(TokenType.OPERATOR, new int[1] { _pos }, "<=");
+                        tokens.Add(nt);
+                        
+                        _pos = _pos + 1;
+                        continue;
+                    }
+
                     tokens.Add(cur_t);
                     cur_t = new Token((TokenType)0, new int[0], "");
 
@@ -358,6 +371,18 @@ public class Lexer
 
                 case '>':
                 {
+                    if(_essay[_pos + 1] == '=')
+                    {
+                        tokens.Add(cur_t);
+                        cur_t = new Token((TokenType)0, new int[0], "");
+
+                        Token nt = new Token(TokenType.OPERATOR, new int[1] { _pos }, "=>");
+                        tokens.Add(nt);
+                        
+                        _pos = _pos + 1;
+                        continue;
+                    }
+
                     tokens.Add(cur_t);
                     cur_t = new Token((TokenType)0, new int[0], "");
 

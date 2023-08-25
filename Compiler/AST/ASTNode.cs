@@ -6,7 +6,10 @@ namespace Emerald.AST;
 
 public class ASTNode { }
 
-public class ExpressionNode : ASTNode { }
+public class ExpressionNode : ASTNode 
+{ 
+    public int pLevel { get; set; } = 5;
+}
 
 public class StatementNode : ASTNode 
 { 

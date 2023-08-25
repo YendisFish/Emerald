@@ -2,6 +2,7 @@ using Emerald.Types;
 using Emerald.AST;
 using System.Runtime.InteropServices;
 using System.Data.Common;
+using System.Net.Http.Headers;
 
 namespace Emerald.Parsing;
 
@@ -26,7 +27,7 @@ public class Parser
         List<FunctionDeclarationNode> nodes = ParseFunctionDeclarations();
         for (int i = 0; i < nodes.Count; i++)
         {
-            //ParseFunctionBody(nodes[i]);
+            ParseFunctionBody(nodes[i]);
             tree.nodes.Add(nodes[i]);
         }
 
@@ -405,8 +406,9 @@ public class Parser
                 continue;
             }
 
-            if (toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD || toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[i + 1]._value == "*")
+            if (toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.WORD || /* toks[i]._tp == TokenType.WORD && toks[i + 1]._tp == TokenType.OPERATOR && toks[i + 1]._value == "*" THIS PART OF THE CODE IS FAILING/THINKS ITS READING A VAR WHEN ITS READING (WORD OP OP)*/)
             {
+                Console.WriteLine($"Found var {toks[i]._value}");
                 VarDeclarationNode node = new();
                 i = ParseVarDeclaration(ref node, i);
                 decl.body.Add(node);
@@ -461,16 +463,19 @@ public class Parser
 
         node.name = toks[start]._value;
 
-        start = start + 1; //may need to be removed
+        //start = start + 1; //may need to be removed
 
+        Console.WriteLine(toks[start]._value);
         if (toks[start]._tp == TokenType.OPERATOR && toks[start]._value == "=")
         {
             start = start + 1;
 
             Console.WriteLine(toks[start]._value);
 
-            ExpressionNode expr = new ExpressionNode();
-            start = ParseExpression(ref expr, start, node.type);
+            ExpressionNode expr = ParseExpression(start);
+
+            List<Token> placehodler = new();
+            start = FindExpressionEnd(start, out placehodler);
 
             VariableExpressionNode varNode = new();
             varNode.varName = node.name;
@@ -484,145 +489,163 @@ public class Parser
         }
         else
         {
+            Console.WriteLine(toks[start]._value);
+            Console.WriteLine($"{toks[start - 3]._value}{toks[start - 2]._value}{toks[start - 1]._value}{toks[start]._value}{toks[start + 1]._value}{toks[start + 2]._value}{toks[start + 3]._value}");
             throw new Exception($"Could not parse variable declaration for variable {node.name}");
         }
 
+        start = start + 1;
         return start;
     }
 
-    public int ParseExpression(ref ExpressionNode expr, int start, string type)
+    public ExpressionNode ParseExpression(int start)
     {
-        List<Token> n;
-        start = FindExpressionEnd(start, out n);
+        ExpressionNode node = new ExpressionNode();
 
-        if (start is not -1 && n.Count < 2)
+        List<Token> op = new();
+        int end = FindExpressionEnd(start, out op);
+
+        if (end is -1) { throw new Exception(""); }
+
+        //takes care of 1 token expressions
+        if (op.Count is 1)
         {
-            switch (n[0]._tp)
+            node = new TextValueNode(); TextValueNode node2 = (node as TextValueNode)!;
+            node.pLevel = 1;
+
+            if (op[0]._tp == TokenType.STRING)
             {
-                case TokenType.STRING:
+                node2.value = op[0]._value;
+                node2.type = "string";
+            }
+
+            if (op[0]._tp == TokenType.CHAR)
+            {
+                node2.value = op[0]._value[0];
+                node2.type = "char";
+            }
+
+            if (op[0]._tp == TokenType.WORD)
+            {
+                try
                 {
-                    expr = new TextValueNode();
-                    ((TextValueNode)expr).type = "string";
-                    ((TextValueNode)expr).value = n[0]._value;
+                    long bs = long.Parse(op[0]._value);
 
-                    break;
-                }
-
-                case TokenType.CHAR:
-                {
-                    expr = new TextValueNode();
-                    ((TextValueNode)expr).type = "char";
-                    ((TextValueNode)expr).value = n[0]._value[0];
-
-                    break;
-                }
-
-                case TokenType.WORD: //handle literally every other type of value
-                {
-                    long checker = long.Parse(n[0]._value);
-                    
-                    try
+                    if (bs > int.MaxValue)
                     {
-                        if(checker > int.MaxValue)
-                        {
-                            expr = new TextValueNode();
-                            ((TextValueNode)expr).type = "int";
-                            ((TextValueNode)expr).value = int.Parse(n[0]._value);
-                        } else {
-                            expr = new TextValueNode();
-                            ((TextValueNode)expr).type = "long";
-                            ((TextValueNode)expr).value = long.Parse(n[0]._value);
-                        }
-                    } catch
-                    {
-                        try
-                        {
-                            VariableExpressionNode? node = expr as VariableExpressionNode;
-
-                            if(node is null) throw new Exception();
-
-                            node!.type = type;
-                            node.varName = n[0]._value;
-                        } catch
-                        {
-                            throw new Exception($"Could not parse expression! Token: {n[0]._value}");
-                        }
+                        node2.value = int.Parse(op[0]._value);
+                        node2.type = "int";
                     }
-
-                    break;
+                    else
+                    {
+                        node2.value = bs;
+                        node2.type = "long";
+                    }
                 }
-            }
-        }
-        else
-        {
-            ParseComplicatedExpression(ref expr, ref n); // add args for func
-        }
-
-        return start;
-    }
-
-    public void ParseComplicatedExpression(ref ExpressionNode expr, ref List<Token> n)
-    {
-        List<Token[]> tokenSegments = new();
-
-        for(int i = 0; i < n.Count; i++)
-        {
-            int prec = 0;
-            if(n[i]._tp == TokenType.OPERATOR)
-            {
-                if(n[i]._value == "&&" || n[i]._value == "<" || n[i]._value == ">" || n[i]._value == "||")
+                catch
                 {
-                    throw new Exception("Ternaries are stupid!");
+                    node2.value = op[0]._value;
+                    node2.type = "VAR";
                 }
-
-                if(n[i]._value == "*" && n[i]._metadata != "mult")
-                {
-                    continue;
-                }
-
-                prec = DeterminePEMDAS(n[i]._value);
             }
-            
-            //this is how we know we are reading a function
-            if(n[i]._tp == TokenType.WORD && n[i + 1]._value == "(")
+
+            node = node2;
+            return node;
+        }
+
+        node = new BinaryExpressionNode();
+        BinaryExpressionNode nd = (node as BinaryExpressionNode)!;
+
+        string delimeters = "+-(*<>=";
+        for (int i = start; i <= op.Count; i++)
+        {
+            Console.WriteLine(i);
+            if (delimeters.Contains(op[i]._value) && op[i]._tp == TokenType.OPERATOR)
             {
-                i = FindMatchingClosingParenthesis(i + 1, ref n);
-                continue;
+                nd.Operator = op[i]._value;
+
+                i = i + 1;
+
+                nd.right = ParseExpression(i);
+                nd.pLevel = DeterminePEMDAS(op[i]._value);
             }
         }
+
+        TextValueNode txtval = new();
+        node.pLevel = 1;
+
+        if (op[0]._tp == TokenType.STRING)
+        {
+            txtval.value = op[0]._value;
+            txtval.type = "string";
+        }
+
+        if (op[0]._tp == TokenType.CHAR)
+        {
+            txtval.value = op[0]._value[0];
+            txtval.type = "char";
+        }
+
+        if (op[0]._tp == TokenType.WORD)
+        {
+            try
+            {
+                long bs = long.Parse(op[0]._value);
+
+                if (bs > int.MaxValue)
+                {
+                    txtval.value = int.Parse(op[0]._value);
+                    txtval.type = "int";
+                }
+                else
+                {
+                    txtval.value = bs;
+                    txtval.type = "long";
+                }
+            }
+            catch
+            {
+                txtval.value = op[0]._value;
+                txtval.type = "VAR";
+            }
+        }
+
+        nd.left = txtval;
+
+        return node;
     }
 
     public int DeterminePEMDAS(string val)
     {
-        switch(val)
+        switch (val)
         {
             case "(":
-            {
-                return 1;
-            }
+                {
+                    return 1;
+                }
 
             case "*":
-            {
-                return 2;
-            }
+                {
+                    return 2;
+                }
 
             case "/":
-            {
-                return 3;
-            }
+                {
+                    return 3;
+                }
 
             case "+":
-            {
-                return 4;
-            }
+                {
+                    return 4;
+                }
 
             case "-":
-            {
-                return 5;
-            }
+                {
+                    return 5;
+                }
         }
 
-        return -1; 
+        return -1;
     }
 
     public Tuple<Token[], Token[]> SplitToks(List<Token> list, int splitIndex)
@@ -630,9 +653,9 @@ public class Parser
         List<Token> slice1 = new();
         List<Token> slice2 = new();
 
-        for(int i = 0; i < list.Count; i++)
+        for (int i = 0; i < list.Count; i++)
         {
-            if(i >= splitIndex)
+            if (i >= splitIndex)
             {
                 slice2.Add(list[i]);
                 continue;
